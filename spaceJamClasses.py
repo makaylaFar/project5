@@ -51,6 +51,10 @@ class spaceShip(SphereCollideObject):
         self.modelNode.setTexture(tex, 1)
         self.SetKeyBindings()
 
+        self.reloadTime = .25
+        self.missileDistance= 4000 # until it explodes
+        self.missileBay = 1 # only 1 missile in the bay to be launched
+
     def SetKeyBindings(self):
         self.accept("w", self.Thrust, [1])
         self.accept("w-up", self.Thrust, [0])
@@ -72,6 +76,8 @@ class spaceShip(SphereCollideObject):
 
         self.accept("arrow_right", self.RollRight, [1])
         self.accept("arrow_right-up", self.RollRight, [0])
+
+        self.accept('f', self.Fire)
 
     def Thrust(self, keyDown):
         if keyDown:
@@ -160,6 +166,19 @@ class spaceShip(SphereCollideObject):
         rate = .6
         self.modelNode.setR(self.modelNode.getR() - rate)
         return Task.cont
+    
+    def Fire(self):
+        if self.missileBay:
+            travRate = self.missileDistance
+            aim = self.rendergetRelativeVector(self.modelNode, Vec3.forward()) # fires in direction ship is facing
+
+            # Normalizing a vector makes it consistent all the time
+            aim.normalize()
+
+            fireSolution = aim * travRate
+            inFront = aim * 150
+    
+    
 
 class spaceStation(CapsuleCollidableObject):
     def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float):
@@ -179,3 +198,6 @@ class yz():
 
 class xy():
     circleIncrement = 0
+
+class Missle(SphereCollideObject):
+    
