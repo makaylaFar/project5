@@ -42,6 +42,7 @@ class spaceShip(SphereCollideObject):
         self.taskManager = task
         self.render = render
         self.accept = accept
+        self.loader = loader
 
         self.modelNode.setPos(posVec)
         self.modelNode.setScale(scaleVec)
@@ -53,7 +54,10 @@ class spaceShip(SphereCollideObject):
 
         self.reloadTime = .25
         self.missileDistance= 4000 # until it explodes
-        self.missileBay = 1 # only 1 missile in the bay to be launched
+        self.missileBay = 1 # only 1 missile in the bay to be
+        self.taskManager.add(self.CheckIntervals, 'checkMissiles', 34)
+
+
 
     def SetKeyBindings(self):
         self.accept("w", self.Thrust, [1])
@@ -183,12 +187,51 @@ class spaceShip(SphereCollideObject):
 
             posVec = self.modelNode.getPos() + InFront # spawn the missile in front of the nose of the ship
 
-            #create missile
+            #create our missile
             currentMissile = Missile(self.loader, './assets/phaser/phaser.egg', self.render, tag, posVec, 4.0)
 
             # "fluid = 1" makes collision be checked between the last interval and this interval to make sure theres nothing in-between both chcecks thath wasn't hit.
             Missile.Intervals[tag] = currentMissile.modelNode.posInterval(2.0, travVec, startPos = posVec, fluid = 1)
             Missile.Intervals[tag].start()
+
+        else:
+            # if we aren't reloading, we want to start reloading.
+            if not self.taskManager.hasTaskNamed('reload'):
+                print('Initializing reload...')
+                # call the reload method on no delay.
+                self.taskManager.doMethodLater(0, self.Reload, 'reload')
+                return Task.cont
+            
+
+    def Reload(self, task):
+        if task.time > self.reloadTime:
+            self.missileBay += 1
+            if self.missileBay > 1:
+                self.missileBay = 1
+                print ("Reload complete.")
+                return Task.done
+            
+            elif task.time <= self.reloadTime:
+                print("reload proceeding...")
+                return Task.cont
+            
+    def CheckIntervals(self, task):
+        for i in Missile.Intervals:
+            #isPlaying returns true or false to see if the missile has gotten to the end of its path.
+            if not Missile.Intervals[i].isPlaying():
+                # if its path is done, we get rid of everything to do with that missile.
+                Missile.cNodes[i].detachNode()
+                Missile.fireModels[i].detachNode()
+
+                del Missile.Intervals[i]
+                del Missile.fireModels[i]
+                del Missile.cNodes[i]
+                del Missile.collisionSolids[i]
+                print(i +' has reached the end of its fire solution.')
+
+                # we break because whn things are deleted from a dictionary, we have to refactor the dictionary so we can reuse it. This is because when we delete things, there's a gap at that point.
+                break
+            return Task.cont
     
     
 
