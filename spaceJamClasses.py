@@ -225,12 +225,12 @@ class spaceShip(SphereCollideObject):
             self.missileBay += 1
             if self.missileBay > 1:
                 self.missileBay = 1
-                print ("Reload complete.")
-                return Task.done
+            print ("Reload complete.")
+            return Task.done
             
-            elif task.time <= self.reloadTime:
-                print("reload proceeding...")
-                return Task.cont
+        elif task.time <= self.reloadTime:
+            print("reload proceeding...")
+            return Task.cont
             
    
     
