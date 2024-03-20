@@ -4,6 +4,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
 from collideObjectBase import *
 from typing import Callable
+from direct.gui.OnscreenImage import OnscreenImage
 
 class Planet(SphereCollideObject):
     def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float):
@@ -41,7 +42,7 @@ class spaceShip(SphereCollideObject):
         super(spaceShip, self).__init__(loader, modelPath, parentNode, nodeName, 0, 2)
         self.taskManager = task
         self.render = render
-        self.accept = accept
+        self.accept = accept                                                                                            
         self.loader = loader
 
         self.modelNode.setPos(posVec)
@@ -53,10 +54,12 @@ class spaceShip(SphereCollideObject):
         self.SetKeyBindings()
 
         self.reloadTime = .25
-        self.missileDistance= 4000 # until it explodes
+        self.missileDistance = 4000 # until it explodes
         self.missileBay = 1 # only 1 missile in the bay to be
         
         self.taskManager.add(self.CheckIntervals, 'checkMissiles', 34)
+
+        self.enableHUD()
 
     def CheckIntervals(self, task):
         for i in Missile.Intervals:
@@ -74,7 +77,7 @@ class spaceShip(SphereCollideObject):
 
                 # we break because whn things are deleted from a dictionary, we have to refactor the dictionary so we can reuse it. This is because when we delete things, there's a gap at that point.
                 break
-            return Task.cont
+        return Task.cont
 
     def SetKeyBindings(self):
         self.accept("w", self.Thrust, [1])
@@ -231,6 +234,12 @@ class spaceShip(SphereCollideObject):
         elif task.time <= self.reloadTime:
             print("reload proceeding...")
             return Task.cont
+    
+    def enableHUD(self):
+        self.Hud = OnscreenImage(image = "./assets/hud/crossHair.png")
+
+        self.Hud.setTransparency(TransparencyAttrib.MAlpha)
+
             
    
     
