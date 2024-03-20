@@ -55,9 +55,26 @@ class spaceShip(SphereCollideObject):
         self.reloadTime = .25
         self.missileDistance= 4000 # until it explodes
         self.missileBay = 1 # only 1 missile in the bay to be
+        
         self.taskManager.add(self.CheckIntervals, 'checkMissiles', 34)
 
+    def CheckIntervals(self, task):
+        for i in Missile.Intervals:
+            #isPlaying returns true or false to see if the missile has gotten to the end of its path.
+            if not Missile.Intervals[i].isPlaying():
+                # if its path is done, we get rid of everything to do with that missile.
+                Missile.cNodes[i].detachNode()
+                Missile.fireModels[i].detachNode()
 
+                del Missile.Intervals[i]
+                del Missile.fireModels[i]
+                del Missile.cNodes[i]
+                del Missile.collisionSolids[i]
+                print(i + ' has reached the end of its fire solution.')
+
+                # we break because whn things are deleted from a dictionary, we have to refactor the dictionary so we can reuse it. This is because when we delete things, there's a gap at that point.
+                break
+            return Task.cont
 
     def SetKeyBindings(self):
         self.accept("w", self.Thrust, [1])
@@ -215,23 +232,7 @@ class spaceShip(SphereCollideObject):
                 print("reload proceeding...")
                 return Task.cont
             
-    def CheckIntervals(self, task):
-        for i in Missile.Intervals:
-            #isPlaying returns true or false to see if the missile has gotten to the end of its path.
-            if not Missile.Intervals[i].isPlaying():
-                # if its path is done, we get rid of everything to do with that missile.
-                Missile.cNodes[i].detachNode()
-                Missile.fireModels[i].detachNode()
-
-                del Missile.Intervals[i]
-                del Missile.fireModels[i]
-                del Missile.cNodes[i]
-                del Missile.collisionSolids[i]
-                print(i +' has reached the end of its fire solution.')
-
-                # we break because whn things are deleted from a dictionary, we have to refactor the dictionary so we can reuse it. This is because when we delete things, there's a gap at that point.
-                break
-            return Task.cont
+   
     
     
 
