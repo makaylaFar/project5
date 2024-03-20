@@ -177,6 +177,14 @@ class spaceShip(SphereCollideObject):
 
             fireSolution = aim * travRate
             inFront = aim * 150
+            travVec = fireSolution + self.modelNode.getPos()
+            self.missileBay -= 1
+            tag ='Missile' + str(Missile.missileCount)
+
+            posVec = self.modeNode.getPos() + infront # spawn the missile in front of the nose of the ship
+
+            #create missile
+            currentMissile = Missile(self.loader, './assets/')
     
     
 
