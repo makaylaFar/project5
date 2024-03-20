@@ -170,21 +170,25 @@ class spaceShip(SphereCollideObject):
     def Fire(self):
         if self.missileBay:
             travRate = self.missileDistance
-            aim = self.rendergetRelativeVector(self.modelNode, Vec3.forward()) # fires in direction ship is facing
+            aim = self.render.getRelativeVector(self.modelNode, Vec3.forward()) # fires in direction ship is facing
 
             # Normalizing a vector makes it consistent all the time
             aim.normalize()
 
             fireSolution = aim * travRate
-            inFront = aim * 150
+            InFront = aim * 150
             travVec = fireSolution + self.modelNode.getPos()
             self.missileBay -= 1
             tag ='Missile' + str(Missile.missileCount)
 
-            posVec = self.modeNode.getPos() + infront # spawn the missile in front of the nose of the ship
+            posVec = self.modelNode.getPos() + InFront # spawn the missile in front of the nose of the ship
 
             #create missile
-            currentMissile = Missile(self.loader, './assets/')
+            currentMissile = Missile(self.loader, './assets/phaser/phaser.egg', self.render, tag, posVec, 4.0)
+
+            # "fluid = 1" makes collision be checked between the last interval and this interval to make sure theres nothing in-between both chcecks thath wasn't hit.
+            Missile.Intervals[tag] = currentMissile.modelNode.posInterval(2.0, travVec, startPos = posVec, fluid = 1)
+            Missile.Intervals[tag].start()
     
     
 
@@ -207,5 +211,28 @@ class yz():
 class xy():
     circleIncrement = 0
 
-class Missle(SphereCollideObject):
+class Missile(SphereCollideObject):
+    fireModels = {}
+    cNodes = {}
+    collisionSolids = {}
+    Intervals = {}
+    missileCount = 0
+
+    def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, posVec: Vec3, scaleVec: float = 1.0):
+        super(Missile, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(0,0,0), 3.0)
+        self.modelNode.setScale(scaleVec)
+        self.modelNode.setPos(posVec)
+
+        Missile.missileCount += 1
+
+        Missile.fireModels[nodeName] = self.modelNode
+        Missile.cNodes[nodeName] = self.collisionNode
+
+        # we retrieve the solid for our collisionNode.
+        Missile.collisionSolids[nodeName] = self.collisionNode.node().getSolid(0)
+        Missile.cNodes[nodeName].show()
+
+        print ("fire Torpedo #" + str(Missile.missileCount))
+
+        
     
